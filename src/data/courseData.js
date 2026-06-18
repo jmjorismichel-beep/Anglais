@@ -252,7 +252,7 @@ export const DEMO_LEARNERS = [
 
 export const GROUPS = [
   { id: 1, name: 'Groupe #AVENIR — Le Havre · A1', level: 'A1', learnerIds: [1,2,3,4,5,6], trainer: 'Joris Michel' },
-  { id: 2, name: 'Groupe RÉCIFE — Savoirs Essentiels · A1-A2', level: 'A1-A2', learnerIds: [7,8], trainer: 'Joris Michel' },
+  { id: 2, name: 'Groupe Savoirs Essentiels · A1-A2', level: 'A1-A2', learnerIds: [7,8], trainer: 'Joris Michel' },
 ];
 
 // Questions test de positionnement

@@ -5,7 +5,7 @@ import * as XLSX from 'xlsx'
 export function usePDFGenerator() {
   const [generating, setGenerating] = useState(false)
 
-  const generateAttestation = async ({ learner, group, center = 'RÉCIFE' }) => {
+  const generateAttestation = async ({ learner, group, center = 'Centre de formation' }) => {
     setGenerating(true)
     try {
       // Créer le HTML puis l'ouvrir dans une nouvelle fenêtre pour impression
@@ -66,7 +66,7 @@ export function usePDFGenerator() {
     }
   }
 
-  const generateExerciseSheet = async ({ unit, level = 'A1', group, center = 'RÉCIFE', color = 'color', exercises }) => {
+  const generateExerciseSheet = async ({ unit, level = 'A1', group, center = 'Centre de formation', color = 'color', exercises }) => {
     setGenerating(true)
     try {
       const date = new Date().toLocaleDateString('fr-FR')
@@ -138,7 +138,7 @@ export function usePDFGenerator() {
     }
   }
 
-  const generateVocabCards = async ({ words, unit, center = 'RÉCIFE' }) => {
+  const generateVocabCards = async ({ words, unit, center = 'Centre de formation' }) => {
     setGenerating(true)
     try {
       const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><style>

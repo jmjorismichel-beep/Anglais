@@ -46,7 +46,7 @@ export function PrintPage() {
     logo: true,
     learnerName: '',
     groupName: 'Groupe #AVENIR Le Havre',
-    center: 'RÉCIFE',
+    center: 'Centre de formation',
     includeAnswers: false,
   })
 

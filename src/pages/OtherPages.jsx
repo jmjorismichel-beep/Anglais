@@ -465,7 +465,7 @@ export function PrintPage() {
             </div>
             <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
               <input type="checkbox" id="logo" checked={selected.logo} onChange={e => setSelected(s=>({...s,logo:e.target.checked}))} />
-              <label htmlFor="logo" style={{ fontSize: 13 }}>Inclure le logo du centre de formation (RÉCIFE)</label>
+              <label htmlFor="logo" style={{ fontSize: 13 }}>Inclure le logo du centre de formation</label>
             </div>
             <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
               <input type="text" placeholder="Nom du groupe ou de l'apprenant (optionnel)" style={{ width: '100%', padding: '8px 12px', border: '0.5px solid #e5e7eb', borderRadius: 6, fontSize: 13 }} />
