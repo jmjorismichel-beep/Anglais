@@ -21,7 +21,8 @@ const RECENT = [
 
 export function DashboardPage() {
   const { user, xp, streak, setPage } = useStore();
-  const firstName = user?.firstName || 'apprenant·e';
+  const { user, profile, xp, streak, setPage } = useStore()
+  const firstName = profile?.first_name || user?.firstName || 'apprenant·e';
 
   return (
     <div className="animate-fade-in">
