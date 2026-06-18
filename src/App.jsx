@@ -3,22 +3,38 @@ import useStore from './lib/store.js'
 import { Layout } from './components/Layout.jsx'
 import { Notification } from './components/UI.jsx'
 import { LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage } from './pages/Auth.jsx'
-import { DashboardPage } from './pages/Dashboard.jsx'
+import { DashboardPage, ProgressPage } from './pages/LearnerPages.jsx'
 import { ModulesPage } from './pages/Modules.jsx'
 import { ExercisesPage } from './pages/Exercises.jsx'
 import { PrintPage } from './pages/PrintPage.jsx'
-import { TrainerPage } from './pages/TrainerPage.jsx'
-import { PositioningPage, ProgressPage, AIPage, StatsPage, SettingsPage, HelpPage } from './pages/OtherPages.jsx'
+import { TrainerPage } from './pages/TrainerFullPage.jsx'
+import { PositioningPage, AIPage, StatsPage, SettingsPage, HelpPage } from './pages/OtherPages.jsx'
 
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}))
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').then(reg => {
+      // Écouter les messages du SW (sync offline)
+      navigator.serviceWorker.addEventListener('message', e => {
+        if (e.data?.type === 'SYNC_PROGRESS') {
+          useStore.getState().syncOfflineQueue()
+        }
+      })
+    }).catch(() => {})
+  })
 }
 
 const PAGES = {
-  dashboard: DashboardPage, modules: ModulesPage, exercises: ExercisesPage,
-  positioning: PositioningPage, progress: ProgressPage, ai: AIPage,
-  trainer: TrainerPage, print: PrintPage, stats: StatsPage,
-  settings: SettingsPage, help: HelpPage,
+  dashboard:   DashboardPage,
+  modules:     ModulesPage,
+  exercises:   ExercisesPage,
+  positioning: PositioningPage,
+  progress:    ProgressPage,
+  ai:          AIPage,
+  trainer:     TrainerPage,
+  print:       PrintPage,
+  stats:       StatsPage,
+  settings:    SettingsPage,
+  help:        HelpPage,
 }
 
 function AppContent() {
@@ -38,10 +54,8 @@ export default function App() {
   useEffect(() => { if (settings) applySettings(settings) }, [])
 
   useEffect(() => {
-    // Détecter le hash #access_token dans l'URL après clic sur lien email
     const hash = window.location.hash
     if (hash.includes('access_token') || hash.includes('type=recovery')) {
-      // Supabase gère automatiquement la session via onAuthStateChange
       window.history.replaceState(null, '', window.location.pathname)
     }
     const handle = () => syncOfflineQueue()
@@ -64,11 +78,10 @@ export default function App() {
   )
 
   if (!isAuthenticated) {
-    // Détecter un lien de reset password
     if (window.location.hash.includes('type=recovery')) return <ResetPasswordPage />
-    if (currentPage === 'register')     return <RegisterPage />
-    if (currentPage === 'forgot')       return <ForgotPasswordPage />
-    if (currentPage === 'reset')        return <ResetPasswordPage />
+    if (currentPage === 'register') return <RegisterPage />
+    if (currentPage === 'forgot')   return <ForgotPasswordPage />
+    if (currentPage === 'reset')    return <ResetPasswordPage />
     return <LoginPage />
   }
 

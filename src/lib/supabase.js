@@ -3,20 +3,24 @@ import { createClient } from '@supabase/supabase-js'
 const SUPABASE_URL      = import.meta.env.VITE_SUPABASE_URL      || ''
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
 
-export const isConfigured = SUPABASE_URL.startsWith('https://') && SUPABASE_ANON_KEY.length > 10
+export const isConfigured = SUPABASE_URL.length > 10 && SUPABASE_ANON_KEY.length > 10
 
-// Toujours créer un vrai client (avec des valeurs factices si pas configuré)
-// Ça évite le tree-shaking du module Supabase qui causait le chunk vide
 export const supabase = createClient(
   isConfigured ? SUPABASE_URL : 'https://placeholder.supabase.co',
-  isConfigured ? SUPABASE_ANON_KEY : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder',
-  { auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: true } }
+  isConfigured ? SUPABASE_ANON_KEY : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsYWNlaG9sZGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE2MDAwMDAwMDAsImV4cCI6MTkxNTYzODQwMH0.placeholder',
+  {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+      flowType: 'implicit',
+    }
+  }
 )
 
-// ─── Auth helpers ──────────────────────────────────────────────
 export const authHelpers = {
   async register({ email, password, firstName, lastName }) {
-    if (!isConfigured) throw new Error('Supabase non configuré — ajoutez VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY dans Netlify.')
+    if (!isConfigured) throw new Error('Supabase non configuré.')
     const { data, error } = await supabase.auth.signUp({
       email, password,
       options: {
@@ -29,7 +33,7 @@ export const authHelpers = {
       await supabase.from('learners').upsert({
         id: data.user.id, email,
         first_name: firstName, last_name: lastName,
-      }, { onConflict: 'id' })
+      }, { onConflict: 'id' }).then(() => {})
     }
     return data
   },
@@ -73,7 +77,6 @@ export const authHelpers = {
   },
 }
 
-// ─── Learner helpers ────────────────────────────────────────────
 export const learnerHelpers = {
   async getProfile(userId) {
     if (!isConfigured) return null
@@ -86,11 +89,10 @@ export const learnerHelpers = {
   },
   async addXP(userId, amount) {
     if (!isConfigured) return
-    await supabase.rpc('add_xp', { user_id: userId, xp_amount: amount })
+    await supabase.rpc('add_xp', { user_id: userId, xp_amount: amount }).then(() => {})
   },
 }
 
-// ─── Progress helpers ───────────────────────────────────────────
 export const progressHelpers = {
   async saveProgress(learnerId, { unitId, chapterId, score, timeSpent }) {
     if (!isConfigured) return
@@ -106,7 +108,6 @@ export const progressHelpers = {
   },
 }
 
-// ─── Trainer helpers ────────────────────────────────────────────
 export const trainerHelpers = {
   async sendMessage(fromId, toId, content) {
     if (!isConfigured) return
@@ -119,7 +120,6 @@ export const trainerHelpers = {
   },
 }
 
-// ─── Favorites helpers ──────────────────────────────────────────
 export const favoritesHelpers = {
   async toggle(learnerId, exerciseId) {
     if (!isConfigured) return false
