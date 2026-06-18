@@ -1,72 +1,114 @@
-import useStore from '../lib/store.js';
-import { BookOpen, LayoutDashboard, BookMarked, Pencil, Users, BarChart3, Printer, Bot, Target, Settings, LogOut, HelpCircle, ChevronRight, Wifi, WifiOff } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react'
+import useStore from '../lib/store.js'
+import {
+  BookOpen, LayoutDashboard, BookMarked, Pencil, Users, BarChart3,
+  Printer, Bot, Target, Settings, LogOut, HelpCircle, Wifi, WifiOff,
+  Bell, MessageSquare, ChevronRight, Award, TrendingUp
+} from 'lucide-react'
 
-const NAV_ITEMS = [
-  { id: 'dashboard', label: 'Tableau de bord', icon: LayoutDashboard, section: 'learner' },
-  { id: 'modules', label: 'Mes modules', icon: BookMarked, section: 'learner' },
-  { id: 'exercises', label: 'Exercices', icon: Pencil, badge: '3', section: 'learner' },
-  { id: 'positioning', label: 'Test de positionnement', icon: Target, section: 'learner' },
-  { id: 'progress', label: 'Ma progression', icon: BarChart3, section: 'learner' },
-  { id: 'ai', label: 'Assistant IA', icon: Bot, section: 'learner' },
-  { id: 'trainer', label: 'Mes groupes', icon: Users, badge: '2', badgeColor: '#BA7517', section: 'trainer' },
-  { id: 'print', label: 'Imprimer', icon: Printer, section: 'trainer' },
-  { id: 'stats', label: 'Statistiques', icon: BarChart3, section: 'trainer' },
-  { id: 'settings', label: 'Paramètres', icon: Settings, section: 'settings' },
-];
+// Navigation stagiaire
+const LEARNER_NAV = [
+  { id: 'dashboard',   label: 'Tableau de bord',       icon: LayoutDashboard, section: 'main'     },
+  { id: 'modules',     label: 'Mes modules',            icon: BookMarked,      section: 'main'     },
+  { id: 'exercises',   label: 'Exercices',              icon: Pencil,          section: 'main', badge: '3' },
+  { id: 'positioning', label: 'Test de positionnement', icon: Target,          section: 'main'     },
+  { id: 'progress',    label: 'Ma progression',         icon: TrendingUp,      section: 'main'     },
+  { id: 'ai',          label: 'Assistant IA',           icon: Bot,             section: 'main'     },
+  { id: 'settings',    label: 'Paramètres',             icon: Settings,        section: 'account'  },
+  { id: 'help',        label: 'J\'ai besoin d\'aide',   icon: HelpCircle,      section: 'account'  },
+]
 
-const BOTTOM_NAV = [
-  { id: 'dashboard', label: 'Accueil', icon: LayoutDashboard },
-  { id: 'modules', label: 'Modules', icon: BookMarked },
-  { id: 'exercises', label: 'Exercices', icon: Pencil },
-  { id: 'ai', label: 'IA', icon: Bot },
-  { id: 'trainer', label: 'Formateur', icon: Users },
-];
+// Navigation formateur
+const TRAINER_NAV = [
+  { id: 'trainer',   label: 'Mes groupes',    icon: Users,       section: 'main', badge: null },
+  { id: 'stats',     label: 'Statistiques',   icon: BarChart3,   section: 'main'             },
+  { id: 'print',     label: 'Imprimer',       icon: Printer,     section: 'main'             },
+  { id: 'ai',        label: 'Assistant IA',   icon: Bot,         section: 'main'             },
+  { id: 'modules',   label: 'Bibliothèque',   icon: BookMarked,  section: 'resources'        },
+  { id: 'exercises', label: 'Exercices',      icon: Pencil,      section: 'resources'        },
+  { id: 'settings',  label: 'Paramètres',     icon: Settings,    section: 'account'          },
+  { id: 'help',      label: 'Aide',           icon: HelpCircle,  section: 'account'          },
+]
+
+// Nav mobile stagiaire
+const LEARNER_BOTTOM = [
+  { id: 'dashboard', label: 'Accueil',   icon: LayoutDashboard },
+  { id: 'modules',   label: 'Modules',   icon: BookMarked      },
+  { id: 'exercises', label: 'Exercices', icon: Pencil          },
+  { id: 'progress',  label: 'Progrès',   icon: TrendingUp      },
+  { id: 'ai',        label: 'IA',        icon: Bot             },
+]
+
+// Nav mobile formateur
+const TRAINER_BOTTOM = [
+  { id: 'trainer',  label: 'Groupes',  icon: Users      },
+  { id: 'stats',    label: 'Stats',    icon: BarChart3  },
+  { id: 'print',    label: 'Imprimer', icon: Printer    },
+  { id: 'ai',       label: 'IA',       icon: Bot        },
+  { id: 'settings', label: 'Compte',   icon: Settings   },
+]
 
 export function Layout({ children }) {
-  const { currentPage, setPage, user, logout } = useStore();
-  const [online, setOnline] = useState(navigator.onLine);
+  const { currentPage, setPage, user, profile, logout } = useStore()
+  const [online, setOnline] = useState(navigator.onLine)
 
   useEffect(() => {
-    const on = () => setOnline(true);
-    const off = () => setOnline(false);
-    window.addEventListener('online', on);
-    window.addEventListener('offline', off);
-    return () => { window.removeEventListener('online', on); window.removeEventListener('offline', off); };
-  }, []);
+    const on  = () => setOnline(true)
+    const off = () => setOnline(false)
+    window.addEventListener('online',  on)
+    window.addEventListener('offline', off)
+    return () => { window.removeEventListener('online', on); window.removeEventListener('offline', off) }
+  }, [])
 
-  const initials = user ? `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase() : 'U';
+  // Déterminer le rôle
+  const role      = profile?.role || 'learner'
+  const isTrainer = role === 'trainer'
+  const navItems  = isTrainer ? TRAINER_NAV  : LEARNER_NAV
+  const bottomNav = isTrainer ? TRAINER_BOTTOM : LEARNER_BOTTOM
+
+  const firstName = profile?.first_name || user?.firstName || ''
+  const lastName  = profile?.last_name  || user?.lastName  || ''
+  const initials  = `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase() || 'U'
+  const center    = profile?.center || ''
+
+  // Couleur selon rôle
+  const roleColor  = isTrainer ? '#185FA5' : '#1D9E75'
+  const roleBg     = isTrainer ? '#E6F1FB' : '#E1F5EE'
+  const roleLabel  = isTrainer ? '👨‍🏫 Formateur' : '🎓 Stagiaire'
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       {/* Navbar */}
       <nav style={{ background: '#fff', borderBottom: '0.5px solid #e5e7eb', padding: '0 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 56, position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 36, height: 36, background: '#185FA5', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: 36, height: 36, background: roleColor, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <BookOpen size={20} color="white" />
           </div>
           <div>
-            <div style={{ fontSize: 17, fontWeight: 600, color: '#185FA5' }}>EnglishPath</div>
-            <div style={{ fontSize: 10, color: '#9ca3af' }}>Programme Navigate A1–B1</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: roleColor }}>EnglishPath</div>
+            <div style={{ fontSize: 10, color: '#9ca3af' }}>
+              {isTrainer ? (center || 'Espace formateur') : 'Programme Navigate A1–B1+'}
+            </div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          {/* Online/Offline indicator */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {/* Badge rôle */}
+          <div style={{ display: 'none', alignItems: 'center', gap: 4, background: roleBg, color: roleColor, padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600 }} className="hide-mobile">
+            {roleLabel}
+          </div>
+
+          {/* Statut connexion */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: online ? '#1D9E75' : '#D85A30' }}>
-            {online ? <Wifi size={14} /> : <WifiOff size={14} />}
+            {online ? <Wifi size={13} /> : <WifiOff size={13} />}
             <span className="hide-mobile">{online ? 'En ligne' : 'Hors ligne'}</span>
           </div>
 
+          {/* Avatar */}
           {user && (
-            <>
-              <span style={{ fontSize: 13, color: '#6b7280' }} className="hide-mobile">
-                {user.firstName} {user.lastName}
-              </span>
-              <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#E6F1FB', color: '#185FA5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 600, cursor: 'pointer' }} onClick={() => setPage('settings')}>
-                {initials}
-              </div>
-            </>
+            <div onClick={() => setPage('settings')} style={{ width: 32, height: 32, borderRadius: '50%', background: roleBg, color: roleColor, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, cursor: 'pointer', border: `2px solid ${roleColor}22` }}>
+              {initials}
+            </div>
           )}
         </div>
       </nav>
@@ -76,77 +118,98 @@ export function Layout({ children }) {
         {/* Sidebar desktop */}
         <aside className="sidebar" style={{ width: 220, minWidth: 220, background: '#fff', borderRight: '0.5px solid #e5e7eb', padding: '1rem 0.75rem', display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto' }}>
 
-          <SidebarSection label="Apprenant" />
-          {NAV_ITEMS.filter(i => i.section === 'learner').map(item => (
-            <SidebarItem key={item.id} item={item} active={currentPage === item.id} onClick={() => setPage(item.id)} />
+          {/* Profil utilisateur */}
+          <div style={{ padding: '8px 10px 14px', marginBottom: 4, borderBottom: '0.5px solid #f3f4f6' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ width: 36, height: 36, borderRadius: '50%', background: roleBg, color: roleColor, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>
+                {initials}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {firstName} {lastName}
+                </div>
+                <div style={{ fontSize: 10, background: roleBg, color: roleColor, padding: '1px 6px', borderRadius: 8, display: 'inline-block', fontWeight: 600, marginTop: 2 }}>
+                  {roleLabel}
+                </div>
+              </div>
+            </div>
+            {isTrainer && center && (
+              <div style={{ fontSize: 10, color: '#9ca3af', marginTop: 6, paddingLeft: 44 }}>{center}</div>
+            )}
+          </div>
+
+          {/* Navigation principale */}
+          <SidebarSection label={isTrainer ? 'Mes apprenants' : 'Mon apprentissage'} />
+          {navItems.filter(i => i.section === 'main').map(item => (
+            <SidebarItem key={item.id} item={item} active={currentPage === item.id} onClick={() => setPage(item.id)} roleColor={roleColor} />
           ))}
 
-          <SidebarSection label="Formateur" />
-          {NAV_ITEMS.filter(i => i.section === 'trainer').map(item => (
-            <SidebarItem key={item.id} item={item} active={currentPage === item.id} onClick={() => setPage(item.id)} />
-          ))}
+          {isTrainer && (
+            <>
+              <SidebarSection label="Ressources" />
+              {navItems.filter(i => i.section === 'resources').map(item => (
+                <SidebarItem key={item.id} item={item} active={currentPage === item.id} onClick={() => setPage(item.id)} roleColor={roleColor} />
+              ))}
+            </>
+          )}
 
           <SidebarSection label="Compte" />
-          {NAV_ITEMS.filter(i => i.section === 'settings').map(item => (
-            <SidebarItem key={item.id} item={item} active={currentPage === item.id} onClick={() => setPage(item.id)} />
+          {navItems.filter(i => i.section === 'account').map(item => (
+            <SidebarItem key={item.id} item={item} active={currentPage === item.id} onClick={() => setPage(item.id)} roleColor={roleColor} />
           ))}
 
-          <button onClick={() => { setPage('help'); }} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 8, fontSize: 13, color: '#6b7280', cursor: 'pointer', border: 'none', background: 'none', width: '100%', textAlign: 'left' }}>
-            <HelpCircle size={16} /> J'ai besoin d'aide
+          <button onClick={logout} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 8, fontSize: 13, color: '#D85A30', cursor: 'pointer', border: 'none', background: 'none', width: '100%', textAlign: 'left', marginTop: 8 }}>
+            <LogOut size={16} /> Déconnexion
           </button>
-
-          {user && (
-            <button onClick={logout} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 8, fontSize: 13, color: '#D85A30', cursor: 'pointer', border: 'none', background: 'none', width: '100%', textAlign: 'left', marginTop: 8 }}>
-              <LogOut size={16} /> Déconnexion
-            </button>
-          )}
         </aside>
 
-        {/* Main content */}
-        <main className="content" style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', paddingBottom: '2rem' }}>
+        {/* Contenu principal */}
+        <main className="content" style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', paddingBottom: '5rem' }}>
           {children}
         </main>
       </div>
 
       {/* Bottom nav mobile */}
       <nav className="bottom-nav">
-        {BOTTOM_NAV.map(item => {
-          const Icon = item.icon;
+        {bottomNav.map(item => {
+          const Icon = item.icon
           return (
-            <button key={item.id} className={`bottom-nav-item ${currentPage === item.id ? 'active' : ''}`} onClick={() => setPage(item.id)} aria-label={item.label}>
+            <button key={item.id} className={`bottom-nav-item ${currentPage === item.id ? 'active' : ''}`}
+              onClick={() => setPage(item.id)} aria-label={item.label}
+              style={{ '--role-color': roleColor }}>
               <Icon size={22} />
               <span>{item.label}</span>
             </button>
-          );
+          )
         })}
       </nav>
     </div>
-  );
+  )
 }
 
 function SidebarSection({ label }) {
-  return <div style={{ fontSize: 10, fontWeight: 600, color: '#9ca3af', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0.75rem 0.5rem 0.4rem' }}>{label}</div>;
+  return <div style={{ fontSize: 10, fontWeight: 700, color: '#9ca3af', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '10px 10px 4px' }}>{label}</div>
 }
 
-function SidebarItem({ item, active, onClick }) {
-  const Icon = item.icon;
+function SidebarItem({ item, active, onClick, roleColor }) {
+  const Icon = item.icon
   return (
     <button onClick={onClick} style={{
       display: 'flex', alignItems: 'center', gap: 10,
       padding: '8px 10px', borderRadius: 8, fontSize: 13,
       cursor: 'pointer', border: 'none', width: '100%', textAlign: 'left',
-      background: active ? '#E6F1FB' : 'none',
-      color: active ? '#185FA5' : '#6b7280',
-      fontWeight: active ? 500 : 400,
-      transition: 'background 0.12s',
+      background: active ? `${roleColor}18` : 'none',
+      color: active ? roleColor : '#6b7280',
+      fontWeight: active ? 600 : 400,
+      transition: 'all 0.12s',
     }}>
       <Icon size={16} style={{ width: 18, flexShrink: 0 }} />
       <span style={{ flex: 1 }}>{item.label}</span>
       {item.badge && (
-        <span style={{ background: item.badgeColor || '#185FA5', color: 'white', fontSize: 10, padding: '1px 6px', borderRadius: 10 }}>
+        <span style={{ background: roleColor, color: 'white', fontSize: 10, padding: '1px 6px', borderRadius: 10 }}>
           {item.badge}
         </span>
       )}
     </button>
-  );
+  )
 }

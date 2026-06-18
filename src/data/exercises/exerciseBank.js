@@ -445,3 +445,123 @@ export const EXERCISE_TYPES = {
   pronunciation: { label: 'Prononciation', icon: '🗣️', color: '#D85A30' },
   audio: { label: 'Écoute', icon: '🎧', color: '#BA7517' },
 }
+
+// ─── Exercices A2 ─────────────────────────────────────────────
+export const A2_EXERCISES = [
+
+  // ── UNIT 6 : Going places ──
+  { id: 'a2_u6_01', type: 'qcm', level: 'A2', unit: 6, chapter: '6.1', skill: 'grammaire',
+    question: 'Last summer, we ___ to Spain by plane.',
+    options: ['A. go', 'B. went', 'C. gone', 'D. going'], answer: 1,
+    explanation: '"Last summer" → passé → past simple. "go" est irrégulier : go → went' },
+
+  { id: 'a2_u6_02', type: 'qcm', level: 'A2', unit: 6, chapter: '6.1', skill: 'grammaire',
+    question: 'She ___ enjoy the flight — it was too long.',
+    options: ["A. didn't", "B. doesn't", "C. wasn't", "D. hadn't"], answer: 0,
+    explanation: 'Négatif au past simple → did + not → didn\'t + infinitif' },
+
+  { id: 'a2_u6_03', type: 'qcm', level: 'A2', unit: 6, chapter: '6.1', skill: 'vocabulaire',
+    question: 'You take this at an airport to fly to another country:',
+    options: ['A. a bus', 'B. a train', 'C. a flight', 'D. a taxi'], answer: 2,
+    explanation: '"A flight" = un vol en avion' },
+
+  { id: 'a2_u6_04', type: 'fill', level: 'A2', unit: 6, chapter: '6.2', skill: 'grammaire',
+    sentence: '___ you ___ (visit) the Eiffel Tower when you were in Paris?',
+    blanks: ['Did', 'visit'],
+    hint: 'Question au past simple → Did + sujet + infinitif ?' },
+
+  { id: 'a2_u6_05', type: 'match', level: 'A2', unit: 6, chapter: '6.2', skill: 'vocabulaire',
+    pairs: [
+      { en: 'go → went',   fr: 'aller (irrégulier)' },
+      { en: 'see → saw',   fr: 'voir (irrégulier)'  },
+      { en: 'eat → ate',   fr: 'manger (irrégulier)'},
+      { en: 'buy → bought',fr: 'acheter (irrégulier)'},
+    ]},
+
+  // ── UNIT 7 : Everyday life ──
+  { id: 'a2_u7_01', type: 'qcm', level: 'A2', unit: 7, chapter: '7.1', skill: 'grammaire',
+    question: 'Look! The cat ___ on my laptop again!',
+    options: ['A. sits', 'B. is sitting', 'C. sat', 'D. sit'], answer: 1,
+    explanation: '"Look!" = action en ce moment précis → présent continu "is sitting"' },
+
+  { id: 'a2_u7_02', type: 'qcm', level: 'A2', unit: 7, chapter: '7.1', skill: 'grammaire',
+    question: 'I ___ (always/play) football on Sundays.',
+    options: ['A. am always playing', 'B. always play', 'C. always plays', 'D. played always'], answer: 1,
+    explanation: 'Habitude régulière → présent simple. Position de "always" : avant le verbe principal' },
+
+  { id: 'a2_u7_03', type: 'qcm', level: 'A2', unit: 7, chapter: '7.2', skill: 'grammaire',
+    question: 'How ___ do you go to the gym?',
+    options: ['A. much', 'B. many', 'C. often', 'D. long'], answer: 2,
+    explanation: '"How often?" = À quelle fréquence ? (pour demander la fréquence d\'une action)' },
+
+  { id: 'a2_u7_04', type: 'match', level: 'A2', unit: 7, chapter: '7.2', skill: 'vocabulaire',
+    pairs: [
+      { en: 'once a week',    fr: 'une fois par semaine'  },
+      { en: 'twice a month',  fr: 'deux fois par mois'    },
+      { en: 'every day',      fr: 'tous les jours'        },
+      { en: 'rarely',         fr: 'rarement'              },
+    ]},
+
+  { id: 'a2_u7_05', type: 'fill', level: 'A2', unit: 7, chapter: '7.1', skill: 'grammaire',
+    sentence: 'She ___ (not/watch) TV right now — she ___ (read) a book.',
+    blanks: ["isn't watching", 'is reading'],
+    hint: 'Présent continu négatif et affirmatif' },
+
+  // ── UNIT 8 : Food and drink ──
+  { id: 'a2_u8_01', type: 'qcm', level: 'A2', unit: 8, chapter: '8.1', skill: 'grammaire',
+    question: 'Can I have ___ water, please? I\'m very thirsty.',
+    options: ['A. a', 'B. any', 'C. some', 'D. many'], answer: 2,
+    explanation: '"Some" s\'utilise dans les phrases affirmatives et les demandes polies avec les indénombrables (water)' },
+
+  { id: 'a2_u8_02', type: 'qcm', level: 'A2', unit: 8, chapter: '8.1', skill: 'grammaire',
+    question: 'There aren\'t ___ eggs in the fridge.',
+    options: ['A. some', 'B. any', 'C. much', 'D. a'], answer: 1,
+    explanation: '"Any" dans les phrases négatives avec les dénombrables pluriels' },
+
+  { id: 'a2_u8_03', type: 'qcm', level: 'A2', unit: 8, chapter: '8.2', skill: 'grammaire',
+    question: 'How ___ sugar do you take in your coffee?',
+    options: ['A. many', 'B. much', 'C. any', 'D. some'], answer: 1,
+    explanation: '"How much" pour les indénombrables (sugar, water, money, time)' },
+
+  { id: 'a2_u8_04', type: 'match', level: 'A2', unit: 8, chapter: '8.3', skill: 'vocabulaire',
+    pairs: [
+      { en: 'boil',  fr: 'faire bouillir' },
+      { en: 'bake',  fr: 'cuire au four'  },
+      { en: 'fry',   fr: 'frire'          },
+      { en: 'chop',  fr: 'couper/hacher'  },
+    ]},
+
+  { id: 'a2_u8_05', type: 'qcm', level: 'A2', unit: 8, chapter: '8.1', skill: 'vocabulaire',
+    question: 'Which is an UNCOUNTABLE noun?',
+    options: ['A. apple', 'B. egg', 'C. milk', 'D. sandwich'], answer: 2,
+    explanation: '"Milk" (lait) est indénombrable — on ne peut pas dire "one milk, two milks"' },
+
+  // ── UNIT 9 : City life ──
+  { id: 'a2_u9_01', type: 'qcm', level: 'A2', unit: 9, chapter: '9.1', skill: 'grammaire',
+    question: 'Paris is ___ than my hometown.',
+    options: ['A. more big', 'B. bigger', 'C. biggest', 'D. most big'], answer: 1,
+    explanation: 'Comparatif d\'un adjectif court (1 syllabe) → + er. big → bigger (double g car: consonne + voyelle + consonne)' },
+
+  { id: 'a2_u9_02', type: 'qcm', level: 'A2', unit: 9, chapter: '9.1', skill: 'grammaire',
+    question: 'London is ___ expensive city in the UK.',
+    options: ['A. most', 'B. more', 'C. the most', 'D. the more'], answer: 2,
+    explanation: 'Superlatif → "the most" + adjectif long (2+ syllabes). expensive → the most expensive' },
+
+  { id: 'a2_u9_03', type: 'fill', level: 'A2', unit: 9, chapter: '9.2', skill: 'grammaire',
+    sentence: 'Tokyo is ___ (big) city in Japan. It\'s also ___ (expensive) than London.',
+    blanks: ['the biggest', 'more expensive'],
+    hint: 'big → comparatif: bigger / superlatif: the biggest' },
+
+  { id: 'a2_u9_04', type: 'match', level: 'A2', unit: 9, chapter: '9.3', skill: 'vocabulaire',
+    pairs: [
+      { en: 'Turn left',   fr: 'Tournez à gauche' },
+      { en: 'Turn right',  fr: 'Tournez à droite' },
+      { en: 'Go straight', fr: 'Allez tout droit'  },
+      { en: 'Opposite',    fr: 'En face de'        },
+    ]},
+
+  { id: 'a2_u9_05', type: 'qcm', level: 'A2', unit: 9, chapter: '9.1', skill: 'grammaire',
+    question: 'Good → better → ___',
+    options: ['A. the goodest', 'B. the most good', 'C. the best', 'D. the betterer'], answer: 2,
+    explanation: '"Good" est irrégulier : good → better → the best' },
+]

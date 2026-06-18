@@ -9,15 +9,13 @@ import { ExercisesPage } from './pages/Exercises.jsx'
 import { PrintPage } from './pages/PrintPage.jsx'
 import { TrainerPage } from './pages/TrainerFullPage.jsx'
 import { PositioningPage, AIPage, StatsPage, SettingsPage, HelpPage } from './pages/OtherPages.jsx'
+import { ValidationTestPage } from './pages/ValidationTest.jsx'
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').then(reg => {
-      // Écouter les messages du SW (sync offline)
       navigator.serviceWorker.addEventListener('message', e => {
-        if (e.data?.type === 'SYNC_PROGRESS') {
-          useStore.getState().syncOfflineQueue()
-        }
+        if (e.data?.type === 'SYNC_PROGRESS') useStore.getState().syncOfflineQueue()
       })
     }).catch(() => {})
   })
@@ -35,11 +33,18 @@ const PAGES = {
   stats:       StatsPage,
   settings:    SettingsPage,
   help:        HelpPage,
+  validation:  ValidationTestPage,
 }
 
 function AppContent() {
-  const { currentPage } = useStore()
-  const Page = PAGES[currentPage] || DashboardPage
+  const { currentPage, profile } = useStore()
+
+  // Rediriger formateur vers son espace par défaut
+  const effectivePage = currentPage === 'dashboard' && profile?.role === 'trainer'
+    ? 'trainer'
+    : currentPage
+
+  const Page = PAGES[effectivePage] || DashboardPage
   return <Layout><Page /></Layout>
 }
 
@@ -60,11 +65,14 @@ export default function App() {
     }
     const handle = () => syncOfflineQueue()
     window.addEventListener('online', handle)
-    return () => window.removeEventListener('online', handle)
+    const navHandler = (e) => useStore.getState().setPage(e.detail)
+    window.addEventListener('ep-navigate', navHandler)
+    return () => { window.removeEventListener('online', handle); window.removeEventListener('ep-navigate', navHandler) }
+// removed duplicate return
   }, [])
 
   if (authLoading) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f4ff' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #f0f4ff 0%, #e8f5e9 100%)' }}>
       <div style={{ textAlign: 'center' }}>
         <div style={{ width: 52, height: 52, background: '#185FA5', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
           <span style={{ fontSize: 26, color: 'white' }}>📚</span>

@@ -264,3 +264,89 @@ export const POSITIONING_TEST = [
   { id: 'pt5', type: 'qcm', skill: 'grammaire', question: 'I _____ never been to London.', options: ['A. have', 'B. has', 'C. am', 'D. did'], answer: 0, level_needed: 'B1' },
   { id: 'pt6', type: 'qcm', skill: 'grammaire', question: 'If I _____ more money, I would travel more.', options: ['A. have', 'B. had', 'C. has', 'D. will have'], answer: 1, level_needed: 'B1' },
 ];
+
+// ─── Contenu A2 complet ───────────────────────────────────────
+export const A2_UNITS = [
+  {
+    id: 6, title: 'Going places', level: 'A2', page: 6,
+    grammar: 'Past simple (regular & irregular verbs)',
+    goals: ['Talk about past journeys','Describe places you\'ve visited','Buy tickets and ask for information','Use past simple affirmative and negative','Understand travel announcements'],
+    chapters: [
+      { id: '6.1', title: 'Where did you go?',          grammar: 'Past simple (affirmative)', vocabulary: 'Transport & travel (flight, train, boat, taxi)', mp3_cb: ['06-01.mp3','06-02.mp3','06-03.mp3'], mp3_wb: ['6-01.mp3','6-02.mp3'] },
+      { id: '6.2', title: 'I didn\'t enjoy it!',        grammar: 'Past simple (negative & questions)', vocabulary: 'Holiday activities (swim, visit, eat, see)', mp3_cb: ['06-07.mp3','06-08.mp3'], mp3_wb: ['6-04.mp3'] },
+      { id: '6.3', title: 'Vocabulary & skills',        vocabulary: 'Irregular verbs (go/went, see/saw, eat/ate, buy/bought)', skills: 'Reading: travel blog · Listening: airport announcements' },
+      { id: '6.4', title: 'Speaking & writing',         skills: 'Speaking: buying a train ticket · Writing: a postcard from holiday' },
+      { id: '6.5', title: 'Video',                      video: 'Vidéo 06.mp4', video_topic: 'A trip to Edinburgh — past simple in context' },
+      { id: '6.R', title: 'Review' },
+    ],
+  },
+  {
+    id: 7, title: 'Everyday life', level: 'A2', page: 16,
+    grammar: 'Present continuous + frequency adverbs',
+    goals: ['Talk about daily routines','Describe what people are doing right now','Express frequency','Talk about health and lifestyle','Write a personal email'],
+    chapters: [
+      { id: '7.1', title: 'My typical day',             grammar: 'Present continuous (now vs always)', vocabulary: 'Daily routines (wake up, have breakfast, commute)', mp3_cb: ['07-01.mp3','07-02.mp3'], mp3_wb: ['7-01.mp3'] },
+      { id: '7.2', title: 'How often do you...?',       grammar: 'Frequency adverbs & expressions', vocabulary: 'Health & lifestyle (exercise, sleep, diet)', mp3_cb: ['07-06.mp3','07-07.mp3'], mp3_wb: ['7-04.mp3'] },
+      { id: '7.3', title: 'Vocabulary & skills',        vocabulary: 'Collocations with do/make/have/go', skills: 'Listening: radio interview about healthy habits · Reading: tips for better sleep' },
+      { id: '7.4', title: 'Speaking & writing',         skills: 'Speaking: talking about your routine · Writing: a personal email to a friend' },
+      { id: '7.5', title: 'Video',                      video: 'Vidéo 07.mp4', video_topic: 'A day in the life of a chef in Paris' },
+      { id: '7.R', title: 'Review' },
+    ],
+  },
+  {
+    id: 8, title: 'Food and drink', level: 'A2', page: 26,
+    grammar: 'Countable/uncountable nouns · some/any/much/many',
+    goals: ['Talk about food and cooking','Order food in a restaurant','Describe quantities','Use some/any/much/many correctly','Write a simple recipe'],
+    chapters: [
+      { id: '8.1', title: 'What\'s in the fridge?',    grammar: 'Countable & uncountable nouns', vocabulary: 'Food & drink (fruit, vegetables, dairy, meat)', mp3_cb: ['08-01.mp3','08-02.mp3'], mp3_wb: ['8-01.mp3'] },
+      { id: '8.2', title: 'How much? How many?',       grammar: 'some/any/much/many/a lot of', vocabulary: 'Quantities & recipes (a cup of, a slice of)', mp3_cb: ['08-06.mp3','08-07.mp3'], mp3_wb: ['8-04.mp3'] },
+      { id: '8.3', title: 'Vocabulary & skills',       vocabulary: 'Cooking verbs (boil, fry, bake, chop, mix)', skills: 'Listening: restaurant conversation · Reading: world food quiz' },
+      { id: '8.4', title: 'Speaking & writing',        skills: 'Speaking: ordering in a restaurant · Writing: a simple recipe' },
+      { id: '8.5', title: 'Video',                     video: 'Vidéo 08.mp4', video_topic: 'Street food around the world' },
+      { id: '8.R', title: 'Review' },
+    ],
+  },
+  {
+    id: 9, title: 'City life', level: 'A2', page: 36,
+    grammar: 'Comparatives & superlatives',
+    goals: ['Describe cities and places','Compare different cities','Ask for and give directions','Talk about transport in the city','Write a short description of your town'],
+    chapters: [
+      { id: '9.1', title: 'Which city is bigger?',     grammar: 'Comparatives (bigger, more expensive, better)', vocabulary: 'City features (population, transport, climate, culture)', mp3_cb: ['09-01.mp3','09-02.mp3'], mp3_wb: ['9-01.mp3'] },
+      { id: '9.2', title: 'The best place to live',    grammar: 'Superlatives (the biggest, the most expensive, the best)', vocabulary: 'Urban life (traffic, pollution, nightlife, facilities)', mp3_cb: ['09-06.mp3','09-07.mp3'], mp3_wb: ['9-04.mp3'] },
+      { id: '9.3', title: 'Vocabulary & skills',       vocabulary: 'Prepositions of place & direction (next to, opposite, turn left)', skills: 'Listening: asking for directions · Reading: London vs Paris comparison' },
+      { id: '9.4', title: 'Speaking & writing',        skills: 'Speaking: giving directions · Writing: a short description of your city' },
+      { id: '9.5', title: 'Video',                     video: 'Vidéo 09.mp4', video_topic: 'Living in the city vs the countryside' },
+      { id: '9.R', title: 'Review' },
+    ],
+  },
+]
+
+// ─── Test de validation fin de niveau A1 ─────────────────────
+export const A1_VALIDATION_TEST = {
+  id: 'a1_final',
+  title: 'Test de validation — Niveau A1',
+  description: 'Réussissez ce test pour débloquer le niveau A2 !',
+  passMark: 70,
+  questions: [
+    { id: 'vt1', type: 'qcm', skill: 'grammaire', question: 'She ___ two brothers and one sister.', options: ['A. have', 'B. has', 'C. is', 'D. are'], answer: 1, points: 5, explanation: '"She" → 3ème personne → "has"' },
+    { id: 'vt2', type: 'qcm', skill: 'grammaire', question: 'Where ___ you from?', options: ['A. is', 'B. does', 'C. are', 'D. do'], answer: 2, points: 5, explanation: '"Where are you from?" = forme standard pour demander l\'origine' },
+    { id: 'vt3', type: 'qcm', skill: 'vocabulaire', question: 'What is the opposite of "expensive"?', options: ['A. big', 'B. cheap', 'C. small', 'D. old'], answer: 1, points: 5, explanation: '"Cheap" = bon marché, contraire de "expensive"' },
+    { id: 'vt4', type: 'qcm', skill: 'grammaire', question: 'I ___ TV every evening.', options: ['A. am watching', 'B. watches', 'C. watch', 'D. watching'], answer: 2, points: 5, explanation: 'Habitude régulière → présent simple. "I watch" (pas de -s avec I)' },
+    { id: 'vt5', type: 'qcm', skill: 'vocabulaire', question: 'Which word is a number?', options: ['A. table', 'B. fifteen', 'C. blue', 'D. happy'], answer: 1, points: 5, explanation: '"Fifteen" (15) est un nombre cardinal' },
+    { id: 'vt6', type: 'qcm', skill: 'grammaire', question: 'There ___ a lot of people in the park.', options: ['A. is', 'B. are', 'C. be', 'D. am'], answer: 1, points: 5, explanation: '"A lot of people" est pluriel → "there are"' },
+    { id: 'vt7', type: 'qcm', skill: 'vocabulaire', question: 'What do you say when you meet someone for the first time?', options: ['A. Goodbye!', 'B. Nice to meet you!', 'C. See you later!', 'D. How are you?'], answer: 1, points: 5, explanation: '"Nice to meet you!" s\'utilise lors d\'une première rencontre' },
+    { id: 'vt8', type: 'qcm', skill: 'grammaire', question: '___ she like coffee?', options: ['A. Is', 'B. Have', 'C. Does', 'D. Do'], answer: 2, points: 5, explanation: 'Question au présent simple avec "she" → "Does she..."' },
+    { id: 'vt9', type: 'qcm', skill: 'vocabulaire', question: 'My mother\'s mother is my...', options: ['A. aunt', 'B. sister', 'C. grandmother', 'D. cousin'], answer: 2, points: 5, explanation: 'La mère de ma mère = ma grand-mère (grandmother)' },
+    { id: 'vt10', type: 'qcm', skill: 'grammaire', question: 'I ___ a teacher. I work in a school.', options: ["A. 'm", 'B. is', 'C. are', 'D. be'], answer: 0, points: 5, explanation: '"I am" = je suis. Forme contractée : "I\'m"' },
+    { id: 'vt11', type: 'fill', skill: 'grammaire', question: 'Complete: "This is ___ (my/mine) book. That one is ___ (your/yours)."', blanks: ['my', 'yours'], points: 5, explanation: '"My" + nom / "yours" seul (sans nom)' },
+    { id: 'vt12', type: 'qcm', skill: 'vocabulaire', question: 'What time does the film start? — It starts ___ 8 o\'clock.', options: ['A. in', 'B. on', 'C. at', 'D. by'], answer: 2, points: 5, explanation: 'Heure précise → préposition "at" (at 8 o\'clock)' },
+    { id: 'vt13', type: 'qcm', skill: 'grammaire', question: 'They ___ football yesterday.', options: ["A. play", "B. plays", "C. played", "D. playing"], answer: 2, points: 5, explanation: '"Yesterday" → passé → past simple. "play" → "played" (régulier)' },
+    { id: 'vt14', type: 'qcm', skill: 'vocabulaire', question: 'Which word is a colour?', options: ['A. square', 'B. purple', 'C. happy', 'D. quickly'], answer: 1, points: 5, explanation: '"Purple" = violet, une couleur' },
+    { id: 'vt15', type: 'qcm', skill: 'communication', question: 'How do you ask for the price of something?', options: ['A. What time is it?', 'B. Where is it?', 'C. How much is it?', 'D. How many are there?'], answer: 2, points: 5, explanation: '"How much is it?" = Combien ça coûte ?' },
+    { id: 'vt16', type: 'qcm', skill: 'grammaire', question: 'I ___ my keys. I can\'t find them!', options: ["A. lose", "B. am losing", "C. have lost", "D. lost"], answer: 2, points: 5, explanation: 'Situation actuelle avec conséquence présente → present perfect "have lost"' },
+    { id: 'vt17', type: 'qcm', skill: 'vocabulaire', question: 'Which word means "very tired"?', options: ['A. hungry', 'B. exhausted', 'C. thirsty', 'D. bored'], answer: 1, points: 5, explanation: '"Exhausted" = épuisé, très fatigué' },
+    { id: 'vt18', type: 'qcm', skill: 'grammaire', question: 'She is taller ___ her brother.', options: ['A. that', 'B. as', 'C. than', 'D. then'], answer: 2, points: 5, explanation: 'Comparatif de supériorité → "taller than"' },
+    { id: 'vt19', type: 'qcm', skill: 'communication', question: 'You want to ask if the seat is free. You say:', options: ['A. Is this seat taken?', 'B. Do you sit here?', 'C. Can I take your seat?', 'D. Where is your seat?'], answer: 0, points: 5, explanation: '"Is this seat taken?" = formule polie pour demander si une place est libre' },
+    { id: 'vt20', type: 'qcm', skill: 'vocabulaire', question: 'What do you call the room where you sleep?', options: ['A. kitchen', 'B. bathroom', 'C. bedroom', 'D. living room'], answer: 2, points: 5, explanation: '"Bedroom" = chambre à coucher (room where you sleep)' },
+  ]
+}

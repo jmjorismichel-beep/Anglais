@@ -30,10 +30,33 @@ export function ModulesPage() {
       <Tabs tabs={LEVEL_TABS} active={level} onChange={setLevel} />
 
       {level === 'A1' && <A1Modules openUnit={openUnit} setOpenUnit={setOpenUnit} setPage={setPage} />}
-      {level === 'A2' && <LockedMessage message="Terminez toutes les unités A1 pour débloquer le niveau A2" />}
+      {level === 'A2' && <A2LockedView />}
       {level === 'B1' && <LockedMessage message="Terminez les niveaux A1 et A2 pour débloquer le niveau B1" />}
       {level === 'B1+' && <B1PlusModules />}
       {level === 'pro' && <ProPaths />}
+    </div>
+  )
+}
+
+
+// ─── A2 Locked View ───────────────────────────────────────────
+function A2LockedView() {
+  const { setPage } = useStore ? (() => { try { return require('../lib/store.js').default() } catch { return { setPage: () => {} } } })() : { setPage: () => {} }
+  return (
+    <div style={{ textAlign: 'center', padding: '3rem 1rem', maxWidth: 480, margin: '0 auto' }}>
+      <div style={{ fontSize: 56, marginBottom: 16 }}>🔒</div>
+      <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>Niveau A2 — Élémentaire</h3>
+      <p style={{ fontSize: 14, color: '#6b7280', marginBottom: 20, lineHeight: 1.6 }}>
+        Pour accéder au niveau A2, vous devez d'abord valider le niveau A1 en réussissant le test de fin de niveau.
+      </p>
+      <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+        <button className="btn-primary" onClick={() => window.dispatchEvent(new CustomEvent('ep-navigate', { detail: 'validation' }))}>
+          🏆 Passer le test de validation A1
+        </button>
+        <button className="btn-secondary" onClick={() => window.dispatchEvent(new CustomEvent('ep-navigate', { detail: 'modules' }))}>
+          Réviser le niveau A1
+        </button>
+      </div>
     </div>
   )
 }
