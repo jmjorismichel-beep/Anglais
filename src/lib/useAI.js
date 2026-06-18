@@ -1,89 +1,189 @@
-import { useState } from 'react';
+import { useState, useCallback, useRef } from 'react'
 
-const SYSTEM_PROMPT = `Tu es un assistant pédagogique expert en enseignement de l'anglais pour adultes débutants (A1-B1 CECRL), intégré dans la plateforme EnglishPath.
+// Appel via la fonction Netlify serverless (clé API jamais côté client)
+const callAI = async (messages, mode = 'chat') => {
+  const endpoint = import.meta.env.DEV
+    ? 'https://api.anthropic.com/v1/messages'  // direct en dev (claude.ai gère la clé)
+    : '/.netlify/functions/ai-chat'             // serverless en production
 
-Ton rôle :
-- Expliquer simplement la grammaire anglaise en français
-- Corriger les phrases des apprenants
-- Proposer des exercices interactifs
-- Traduire du français vers l'anglais et inversement
-- Encourager et motiver les apprenants
-- Adapter tes explications au niveau (A1 = très simple, B1 = plus élaboré)
-- Utiliser des exemples concrets du quotidien et du monde professionnel
-- Référencer le programme Navigate quand pertinent (unités 1-5 A1 : First meetings, Questions, People & possessions, My life, Style & design)
+  if (import.meta.env.DEV) {
+    // En dev sur claude.ai — appel direct
+    const SYSTEM = `Tu es un assistant pédagogique expert en anglais A1-B1. Réponds en français, sois bienveillant, clair et concis. Donne des exemples anglais toujours traduits.`
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        system: SYSTEM,
+        messages: messages.map(m => ({
+          role: m.role === 'bot' ? 'assistant' : 'user',
+          content: m.content,
+        })),
+      }),
+    })
+    const data = await res.json()
+    return data.content?.find(b => b.type === 'text')?.text || ''
+  } else {
+    // En production — passe par la fonction serverless
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages, mode }),
+    })
+    const data = await res.json()
+    return data.text || ''
+  }
+}
 
-Style : 
-- Simple, clair, bienveillant
-- Réponses courtes (5-10 lignes max)
-- Exemples en anglais toujours avec traduction française
-- Utilise des emojis modérément pour encourager
-- Si l'apprenant écrit en anglais, réponds en anglais et en français
-- Format : explication courte → exemples → conseil pratique
-
-Tu peux aussi :
-- Générer des exercices QCM, textes à trous, associations
-- Expliquer les erreurs fréquentes
-- Donner des conseils de prononciation
-- Suggérer des stratégies d'apprentissage`;
-
+// ─── Hook principal ─────────────────────────────────────────
 export function useAI() {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false)
 
-  const ask = async (userMessage, conversationHistory = []) => {
-    setLoading(true);
+  const ask = useCallback(async (userMessage, history = []) => {
+    setLoading(true)
     try {
       const messages = [
-        ...conversationHistory
-          .filter(m => m.role !== 'system')
-          .map(m => ({ role: m.role === 'bot' ? 'assistant' : 'user', content: m.content })),
-        { role: 'user', content: userMessage }
-      ];
-
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 1000,
-          system: SYSTEM_PROMPT,
-          messages,
-        }),
-      });
-
-      if (!response.ok) throw new Error('API error');
-      const data = await response.json();
-      const text = data.content?.find(b => b.type === 'text')?.text || 'Désolé, je n\'ai pas pu répondre.';
-      return text;
+        ...history.filter(m => m.role !== 'system'),
+        { role: 'user', content: userMessage },
+      ]
+      return await callAI(messages, 'chat')
     } catch (e) {
-      console.error(e);
-      return 'Connexion temporairement indisponible. Vérifiez votre connexion internet.';
+      console.error(e)
+      return "Connexion temporairement indisponible. Vérifiez votre connexion internet."
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }, [])
 
-  const generateExercise = async (unit, type = 'qcm') => {
-    const prompt = `Génère un exercice de type ${type} pour l'unité ${unit} du programme Navigate A1 en anglais. 
-    Format JSON : { "question": "...", "options": ["A.","B.","C.","D."], "answer": 0, "explanation": "..." }
-    Réponds UNIQUEMENT avec le JSON, sans backticks ni explication.`;
-    const result = await ask(prompt);
+  const correctSentence = useCallback(async (sentence) => {
+    setLoading(true)
     try {
-      return JSON.parse(result.replace(/```json?|```/g, '').trim());
-    } catch {
-      return null;
+      const msg = [{ role: 'user', content: `Corrige cette phrase en anglais et explique les erreurs en français de façon encourageante : "${sentence}"` }]
+      return await callAI(msg, 'correct')
+    } finally { setLoading(false) }
+  }, [])
+
+  const translate = useCallback(async (text, dir = 'fr-en') => {
+    setLoading(true)
+    try {
+      const prompt = dir === 'fr-en'
+        ? `Traduis en anglais avec un exemple d'utilisation : "${text}"`
+        : `Traduis en français avec un exemple : "${text}"`
+      return await callAI([{ role: 'user', content: prompt }], 'chat')
+    } finally { setLoading(false) }
+  }, [])
+
+  const generateExercise = useCallback(async (unit, type = 'qcm', level = 'A1') => {
+    setLoading(true)
+    try {
+      const prompt = `Génère un exercice de type ${type} niveau ${level} pour l'unité ${unit} du programme Navigate anglais.
+Format JSON strict sans markdown : {"question":"...","options":["A. ...","B. ...","C. ...","D. ..."],"answer":0,"explanation":"..."}`
+      const result = await callAI([{ role: 'user', content: prompt }], 'exercise')
+      return JSON.parse(result.replace(/```json?|```/g, '').trim())
+    } catch { return null }
+    finally { setLoading(false) }
+  }, [])
+
+  const getPronunciation = useCallback(async (word) => {
+    setLoading(true)
+    try {
+      const prompt = `Donne la prononciation de "${word}" en phonétique IPA et explique simplement comment le prononcer en français. Ajoute les erreurs fréquentes des francophones.`
+      return await callAI([{ role: 'user', content: prompt }], 'tts')
+    } finally { setLoading(false) }
+  }, [])
+
+  return { ask, correctSentence, translate, generateExercise, getPronunciation, loading }
+}
+
+// ─── Text-to-Speech (Web Speech API) ───────────────────────
+export function useTTS() {
+  const [speaking, setSpeaking] = useState(false)
+  const utteranceRef = useRef(null)
+
+  const speak = useCallback((text, lang = 'en-GB', rate = 1) => {
+    if (!window.speechSynthesis) return
+    window.speechSynthesis.cancel()
+    const utterance = new SpeechSynthesisUtterance(text)
+    utterance.lang = lang
+    utterance.rate = rate
+    utterance.onstart = () => setSpeaking(true)
+    utterance.onend = () => setSpeaking(false)
+    utterance.onerror = () => setSpeaking(false)
+    utteranceRef.current = utterance
+
+    // Choisir une voix anglaise de qualité
+    const voices = window.speechSynthesis.getVoices()
+    const enVoice = voices.find(v => v.lang.startsWith('en') && v.name.includes('Google'))
+      || voices.find(v => v.lang === 'en-GB')
+      || voices.find(v => v.lang.startsWith('en'))
+    if (enVoice) utterance.voice = enVoice
+
+    window.speechSynthesis.speak(utterance)
+  }, [])
+
+  const stop = useCallback(() => {
+    window.speechSynthesis?.cancel()
+    setSpeaking(false)
+  }, [])
+
+  const speakInstruction = useCallback((text, lang = 'fr-FR') => {
+    speak(text, lang, 0.9) // Consignes en français, plus lent
+  }, [speak])
+
+  return { speak, stop, speakInstruction, speaking, supported: 'speechSynthesis' in window }
+}
+
+// ─── Speech Recognition (exercices de prononciation) ────────
+export function useSpeechRecognition() {
+  const [listening, setListening] = useState(false)
+  const [transcript, setTranscript] = useState('')
+  const [error, setError] = useState(null)
+  const recognitionRef = useRef(null)
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+  const supported = !!SpeechRecognition
+
+  const start = useCallback((lang = 'en-US') => {
+    if (!supported) { setError('Reconnaissance vocale non supportée sur ce navigateur'); return }
+    const recognition = new SpeechRecognition()
+    recognition.lang = lang
+    recognition.continuous = false
+    recognition.interimResults = true
+    recognition.maxAlternatives = 3
+
+    recognition.onstart = () => { setListening(true); setError(null); setTranscript('') }
+    recognition.onresult = (e) => {
+      const t = Array.from(e.results).map(r => r[0].transcript).join('')
+      setTranscript(t)
     }
-  };
+    recognition.onerror = (e) => { setError(e.error); setListening(false) }
+    recognition.onend = () => setListening(false)
 
-  const correctSentence = async (sentence) => {
-    return await ask(`Corrige cette phrase en anglais et explique les erreurs en français : "${sentence}"`);
-  };
+    recognitionRef.current = recognition
+    recognition.start()
+  }, [supported])
 
-  const translate = async (text, direction = 'fr-en') => {
-    const prompt = direction === 'fr-en'
-      ? `Traduis en anglais et donne un exemple d'utilisation : "${text}"`
-      : `Traduis en français et donne un exemple d'utilisation : "${text}"`;
-    return await ask(prompt);
-  };
+  const stop = useCallback(() => {
+    recognitionRef.current?.stop()
+    setListening(false)
+  }, [])
 
-  return { ask, generateExercise, correctSentence, translate, loading };
+  // Comparer la prononciation avec le texte cible
+  const compareWithTarget = (userSaid, target) => {
+    const normalize = s => s.toLowerCase().trim().replace(/[^a-z\s]/g, '')
+    const u = normalize(userSaid)
+    const t = normalize(target)
+    if (u === t) return { score: 100, feedback: '✅ Parfait !' }
+    const words = t.split(' ')
+    const said = u.split(' ')
+    const correct = words.filter((w, i) => said[i] === w).length
+    const score = Math.round((correct / words.length) * 100)
+    return {
+      score,
+      feedback: score >= 80 ? '👍 Très bien !' : score >= 50 ? '🔄 Essayez encore' : '❌ Réessayez lentement',
+    }
+  }
+
+  return { start, stop, listening, transcript, error, supported, compareWithTarget }
 }
