@@ -90,7 +90,7 @@ export function LoginPage() {
 export function RegisterPage() {
   const { setPage } = useStore()
   const [role, setRole]   = useState(null) // null = choix du rôle, 'learner' ou 'trainer'
-  const [form, setForm]   = useState({ firstName: '', lastName: '', email: '', emailConfirm: '', password: '', passwordConfirm: '', center: '' })
+  const [form, setForm]   = useState({ firstName: '', lastName: '', email: '', password: '', passwordConfirm: '', center: '' })
   const [showPwd, setShowPwd] = useState(false)
   const [errors, setErrors]   = useState({})
   const [loading, setLoading] = useState(false)
@@ -156,7 +156,6 @@ export function RegisterPage() {
     if (!form.firstName.trim()) e.firstName = 'Le prénom est requis.'
     if (!form.lastName.trim())  e.lastName  = 'Le nom est requis.'
     if (!form.email.includes('@')) e.email  = 'Email invalide.'
-    if (form.email.trim() !== form.emailConfirm.trim()) e.emailConfirm = 'Les emails ne correspondent pas.'
     if (form.password.length < 8) e.password = 'Au moins 8 caractères.'
     if (!/[A-Z]/.test(form.password)) e.password = (e.password ? e.password + ' ' : '') + 'Ajoutez une majuscule.'
     if (form.password !== form.passwordConfirm) e.passwordConfirm = 'Les mots de passe ne correspondent pas.'
@@ -188,7 +187,7 @@ export function RegisterPage() {
       if (err) {
         if (err.message.includes('already registered') || err.message.includes('User already'))
           setErrors({ email: 'Cet email est déjà utilisé. Connectez-vous ou réinitialisez votre mot de passe.' })
-        else setErrors({ email: err.message })
+        else setErrors({ email: typeof err.message === 'string' ? err.message : 'Erreur lors de l\'inscription. Vérifiez vos informations.' })
       } else {
         if (data.user) {
           await supabase.from('learners').upsert({
@@ -286,9 +285,7 @@ export function RegisterPage() {
         <Field label="Adresse email" type="email" value={form.email}
           onChange={v => setForm(f => ({...f, email: v}))}
           placeholder="votre@email.com" error={errors.email} required />
-        <Field label="Confirmer l'email" type="email" value={form.emailConfirm}
-          onChange={v => setForm(f => ({...f, emailConfirm: v}))}
-          error={errors.emailConfirm} required />
+
         <Field label="Mot de passe" type={showPwd ? 'text' : 'password'}
           value={form.password}
           onChange={v => setForm(f => ({...f, password: v}))}
