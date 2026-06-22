@@ -155,7 +155,8 @@ export function RegisterPage() {
     const e = {}
     if (!form.firstName.trim()) e.firstName = 'Le prénom est requis.'
     if (!form.lastName.trim())  e.lastName  = 'Le nom est requis.'
-    if (!form.email.includes('@')) e.email  = 'Email invalide.'
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(form.email.trim())) e.email = 'Adresse email invalide.'
     if (form.password.length < 8) e.password = 'Au moins 8 caractères.'
     if (!/[A-Z]/.test(form.password)) e.password = (e.password ? e.password + ' ' : '') + 'Ajoutez une majuscule.'
     if (form.password !== form.passwordConfirm) e.passwordConfirm = 'Les mots de passe ne correspondent pas.'
@@ -187,7 +188,12 @@ export function RegisterPage() {
       if (err) {
         if (err.message.includes('already registered') || err.message.includes('User already'))
           setErrors({ email: 'Cet email est déjà utilisé. Connectez-vous ou réinitialisez votre mot de passe.' })
-        else setErrors({ email: typeof err.message === 'string' ? err.message : 'Erreur lors de l\'inscription. Vérifiez vos informations.' })
+        else {
+          const msg = typeof err?.message === 'string' && err.message.length > 0
+            ? err.message
+            : 'Erreur lors de l\'inscription. Réessayez.'
+          setErrors({ email: msg })
+        }
       } else {
         if (data.user) {
           await supabase.from('learners').upsert({
@@ -283,7 +289,7 @@ export function RegisterPage() {
         )}
 
         <Field label="Adresse email" type="email" value={form.email}
-          onChange={v => setForm(f => ({...f, email: v}))}
+          onChange={v => { setForm(f => ({...f, email: v})); setErrors(prev => ({...prev, email: ''})) }}
           placeholder="votre@email.com" error={errors.email} required />
 
         <Field label="Mot de passe" type={showPwd ? 'text' : 'password'}
@@ -476,9 +482,12 @@ function Field({ label, type = 'text', value, onChange, placeholder, error, suff
 }
 
 function ErrorMsg({ msg }) {
+  if (!msg) return null
+  const text = typeof msg === 'string' ? msg : (msg?.message || JSON.stringify(msg))
+  if (!text || text === '{}' || text === 'undefined') return null
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 5, fontSize: 12, color: '#D85A30', marginTop: 5, lineHeight: 1.4 }}>
-      <AlertCircle size={13} style={{ flexShrink: 0, marginTop: 1 }} /> {msg}
+      <AlertCircle size={13} style={{ flexShrink: 0, marginTop: 1 }} /> {text}
     </div>
   )
 }
