@@ -155,8 +155,9 @@ export function RegisterPage() {
     const e = {}
     if (!form.firstName.trim()) e.firstName = 'Le prénom est requis.'
     if (!form.lastName.trim())  e.lastName  = 'Le nom est requis.'
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(form.email.trim())) e.email = 'Adresse email invalide.'
+    if (!form.email.trim() || !form.email.includes('@') || !form.email.includes('.')) {
+      e.email = 'Entrez une adresse email valide (ex: prenom@gmail.com)'
+    }
     if (form.password.length < 8) e.password = 'Au moins 8 caractères.'
     if (!/[A-Z]/.test(form.password)) e.password = (e.password ? e.password + ' ' : '') + 'Ajoutez une majuscule.'
     if (form.password !== form.passwordConfirm) e.passwordConfirm = 'Les mots de passe ne correspondent pas.'
@@ -289,7 +290,7 @@ export function RegisterPage() {
         )}
 
         <Field label="Adresse email" type="email" value={form.email}
-          onChange={v => { setForm(f => ({...f, email: v})); setErrors(prev => ({...prev, email: ''})) }}
+          onChange={v => setForm(f => ({...f, email: v}))}
           placeholder="votre@email.com" error={errors.email} required />
 
         <Field label="Mot de passe" type={showPwd ? 'text' : 'password'}
