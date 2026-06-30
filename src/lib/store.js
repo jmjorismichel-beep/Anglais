@@ -20,7 +20,23 @@ const useStore = create((set, get) => ({
         try {
           if (session?.user) {
             const profile = await learnerHelpers.getProfile(session.user.id)
-            set({ user: session.user, profile, isAuthenticated: true, authLoading: false })
+
+            // Resynchroniser xp/streak avec les vraies valeurs Supabase du compte connecté
+            // (et non plus les valeurs génériques laissées dans le localStorage)
+            const realXp = profile?.xp ?? 0
+            const realStreak = profile?.streak ?? 0
+
+            set({
+              user: session.user,
+              profile,
+              isAuthenticated: true,
+              authLoading: false,
+              xp: realXp,
+              streak: realStreak,
+            })
+            ls.set('ep_xp', realXp)
+            ls.set('ep_streak', realStreak)
+
             if (profile?.settings) get().applySettings(profile.settings)
           } else {
             set({ user: null, profile: null, isAuthenticated: false, authLoading: false })
@@ -52,7 +68,7 @@ const useStore = create((set, get) => ({
       level: 'A1', xp: 1240, streak: 7, current_unit: 3,
     }
     ls.set('ep_demo_user', profile)
-    set({ user: { id: 'demo', email: userData.email }, profile, isAuthenticated: true, authLoading: false })
+    set({ user: { id: 'demo', email: userData.email }, profile, isAuthenticated: true, authLoading: false, xp: 1240, streak: 7 })
   },
 
   logout: async () => {
@@ -95,9 +111,12 @@ const useStore = create((set, get) => ({
   },
 
   // ── XP & GAMIFICATION ─────────────────────────────────────
-  xp:     ls.get('ep_xp', 1240),
-  streak: ls.get('ep_streak', 7),
-  badges: ls.get('ep_badges', ['first_lesson','streak_7','exercises_10','pronunciation']),
+  // Valeurs par défaut remises à zéro : un nouveau compte ne doit jamais
+  // démarrer avec des données factices. Les vraies valeurs sont chargées
+  // depuis Supabase au moment de la connexion (voir initAuth ci-dessus).
+  xp:     ls.get('ep_xp', 0),
+  streak: ls.get('ep_streak', 0),
+  badges: ls.get('ep_badges', []),
 
   addXP: async (amount) => {
     const xp = get().xp + amount
