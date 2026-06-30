@@ -108,6 +108,57 @@ export const progressHelpers = {
   },
 }
 
+// Écriture et lecture des résultats individuels d'exercices
+// (table exercise_results : id, learner_id, exercise_id, exercise_type, score, answer_given, correct, time_spent, answered_at)
+export const exerciseHelpers = {
+  async saveResult(learnerId, { exerciseId, exerciseType, score, answerGiven, correct, timeSpent }) {
+    if (!isConfigured) return
+    try {
+      await supabase.from('exercise_results').insert({
+        learner_id: learnerId,
+        exercise_id: exerciseId,
+        exercise_type: exerciseType,
+        score: score ?? null,
+        answer_given: answerGiven ?? null,
+        correct: !!correct,
+        time_spent: timeSpent ?? null,
+        answered_at: new Date().toISOString(),
+      })
+    } catch (e) {
+      // Échec silencieux : on ne bloque jamais l'exercice en cours pour un problème réseau.
+      // Le résultat reste dans la session locale (sessionScore/sessionTotal du store).
+      console.warn('exerciseHelpers.saveResult a échoué :', e)
+    }
+  },
+
+  // Récupère les N derniers résultats pour affichage dans le tableau de bord
+  async getRecentResults(learnerId, limit = 5) {
+    if (!isConfigured) return []
+    const { data } = await supabase
+      .from('exercise_results')
+      .select('*')
+      .eq('learner_id', learnerId)
+      .order('answered_at', { ascending: false })
+      .limit(limit)
+    return data || []
+  },
+
+  // Statistiques agrégées : nombre total d'exercices faits et taux de réussite
+  async getStats(learnerId) {
+    if (!isConfigured) return { exercisesDone: 0, successRate: 0 }
+    const { data } = await supabase
+      .from('exercise_results')
+      .select('correct')
+      .eq('learner_id', learnerId)
+    if (!data || data.length === 0) return { exercisesDone: 0, successRate: 0 }
+    const correctCount = data.filter(r => r.correct).length
+    return {
+      exercisesDone: data.length,
+      successRate: Math.round((correctCount / data.length) * 100),
+    }
+  },
+}
+
 export const trainerHelpers = {
   async sendMessage(fromId, toId, content) {
     if (!isConfigured) return

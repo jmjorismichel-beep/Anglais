@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { supabase, authHelpers, learnerHelpers, progressHelpers, favoritesHelpers, isConfigured } from './supabase.js'
+import { supabase, authHelpers, learnerHelpers, progressHelpers, exerciseHelpers, favoritesHelpers, isConfigured } from './supabase.js'
 
 const ls = {
   get: (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d } catch { return d } },
@@ -20,12 +20,8 @@ const useStore = create((set, get) => ({
         try {
           if (session?.user) {
             const profile = await learnerHelpers.getProfile(session.user.id)
-
-            // Resynchroniser xp/streak avec les vraies valeurs Supabase du compte connecté
-            // (et non plus les valeurs génériques laissées dans le localStorage)
             const realXp = profile?.xp ?? 0
             const realStreak = profile?.streak ?? 0
-
             set({
               user: session.user,
               profile,
@@ -36,7 +32,6 @@ const useStore = create((set, get) => ({
             })
             ls.set('ep_xp', realXp)
             ls.set('ep_streak', realStreak)
-
             if (profile?.settings) get().applySettings(profile.settings)
           } else {
             set({ user: null, profile: null, isAuthenticated: false, authLoading: false })
@@ -46,7 +41,6 @@ const useStore = create((set, get) => ({
         }
       })
 
-      // Vérifier session existante
       supabase.auth.getSession().then(({ data }) => {
         if (!data?.session) set({ authLoading: false })
       }).catch(() => set({ authLoading: false }))
@@ -59,7 +53,6 @@ const useStore = create((set, get) => ({
     }
   },
 
-  // Mode démo (sans Supabase)
   demoLogin: (userData) => {
     const profile = {
       first_name: userData.firstName || 'Marie',
@@ -77,11 +70,9 @@ const useStore = create((set, get) => ({
     set({ user: null, profile: null, isAuthenticated: false, currentPage: 'dashboard' })
   },
 
-  // ── NAVIGATION ────────────────────────────────────────────
   currentPage: 'dashboard',
   setPage: (page) => set({ currentPage: page }),
 
-  // ── PROGRESSION ───────────────────────────────────────────
   progress: ls.get('ep_progress', {}),
 
   saveProgress: async (unitId, chapterId, score, timeSpent = 0) => {
@@ -110,10 +101,30 @@ const useStore = create((set, get) => ({
     ls.set('ep_offline_queue', [])
   },
 
-  // ── XP & GAMIFICATION ─────────────────────────────────────
-  // Valeurs par défaut remises à zéro : un nouveau compte ne doit jamais
-  // démarrer avec des données factices. Les vraies valeurs sont chargées
-  // depuis Supabase au moment de la connexion (voir initAuth ci-dessus).
+  recordExerciseResult: async ({ exerciseId, exerciseType, score, answerGiven, correct, timeSpent }) => {
+    get().recordAnswer(correct)
+    const { user } = get()
+    if (user?.id && user.id !== 'demo') {
+      try {
+        await exerciseHelpers.saveResult(user.id, { exerciseId, exerciseType, score, answerGiven, correct, timeSpent })
+      } catch {
+        const queue = ls.get('ep_offline_exercise_queue', [])
+        ls.set('ep_offline_exercise_queue', [...queue, { exerciseId, exerciseType, score, answerGiven, correct, timeSpent }])
+      }
+    }
+  },
+
+  syncOfflineExerciseQueue: async () => {
+    const { user } = get()
+    if (!user?.id || user.id === 'demo') return
+    const queue = ls.get('ep_offline_exercise_queue', [])
+    if (!queue.length) return
+    for (const item of queue) {
+      try { await exerciseHelpers.saveResult(user.id, item) } catch {}
+    }
+    ls.set('ep_offline_exercise_queue', [])
+  },
+
   xp:     ls.get('ep_xp', 0),
   streak: ls.get('ep_streak', 0),
   badges: ls.get('ep_badges', []),
@@ -138,7 +149,6 @@ const useStore = create((set, get) => ({
     }
   },
 
-  // ── SETTINGS ──────────────────────────────────────────────
   settings: ls.get('ep_settings', {
     lang: 'fr', fontSize: 'normal', dyslexia: false,
     highContrast: false, audioSpeed: 1, offlineMode: false, readInstructions: false,
@@ -163,7 +173,6 @@ const useStore = create((set, get) => ({
     if (s.fontSize === 'xl')    document.body.classList.add('font-xl')
   },
 
-  // ── POSITIONING ───────────────────────────────────────────
   positioningResult: ls.get('ep_position', null),
   setPositioningResult: async (level) => {
     ls.set('ep_position', level)
@@ -174,7 +183,6 @@ const useStore = create((set, get) => ({
     }
   },
 
-  // ── CHAT AI ───────────────────────────────────────────────
   chatMessages: [{
     role: 'bot',
     content: 'Bonjour ! Je suis votre assistant pédagogique EnglishPath 🤖\n\nJe peux vous aider avec la grammaire, la correction, des exercices et la traduction.\n\nComment puis-je vous aider ?',
@@ -182,7 +190,6 @@ const useStore = create((set, get) => ({
   addChatMessage: (msg) => set(s => ({ chatMessages: [...s.chatMessages, msg] })),
   clearChat: () => set({ chatMessages: [{ role: 'bot', content: 'Nouvelle conversation. Comment puis-je vous aider ?' }] }),
 
-  // ── FAVORITES ─────────────────────────────────────────────
   favorites: ls.get('ep_favorites', []),
   toggleFavorite: async (id) => {
     const { favorites, user } = get()
@@ -194,14 +201,12 @@ const useStore = create((set, get) => ({
     }
   },
 
-  // ── NOTIFICATIONS ─────────────────────────────────────────
   notification: null,
   showNotif: (msg, type = 'success') => {
     set({ notification: { msg, type, id: Date.now() } })
     setTimeout(() => set({ notification: null }), 3500)
   },
 
-  // ── SESSION EXERCICES ──────────────────────────────────────
   sessionScore: 0, sessionTotal: 0, sessionStart: null,
   startSession: () => set({ sessionScore: 0, sessionTotal: 0, sessionStart: Date.now() }),
   recordAnswer: (correct) => set(s => ({
@@ -213,7 +218,6 @@ const useStore = create((set, get) => ({
     return sessionTotal > 0 ? Math.round((sessionScore / sessionTotal) * 100) : 0
   },
 
-  // ── CONFIG STATUS ──────────────────────────────────────────
   isConfigured,
 }))
 
