@@ -47,7 +47,7 @@ export function ExercisesPage() {
 
 // ─── Smart Queue (répétition espacée) ───────────────────────
 function SmartQueue() {
-  const { addXP, showNotif, recordAnswer } = useStore()
+  const { addXP, showNotif, recordExerciseResult } = useStore()
   const [history, setHistory] = useState(() => {
     try { return JSON.parse(localStorage.getItem('ep_sr_history') || '{}') } catch { return {} }
   })
@@ -73,7 +73,14 @@ function SmartQueue() {
     setHistory(newHistory)
     localStorage.setItem('ep_sr_history', JSON.stringify(newHistory))
     setAnswered(true)
-    recordAnswer(correct)
+    recordExerciseResult({
+      exerciseId: ex.id,
+      exerciseType: ex.type,
+      score: correct ? 100 : 0,
+      answerGiven: null,
+      correct,
+      timeSpent: Math.round(responseTime / 1000),
+    })
     if (correct) { addXP(10); showNotif('✅ +10 XP', 'success') }
     else showNotif('❌ Réessayez !', 'error')
   }
@@ -110,7 +117,8 @@ function QCMExercise({ exercises }) {
   const [answered, setAnswered] = useState(false)
   const [selected, setSelected] = useState(null)
   const [showHint, setShowHint] = useState(false)
-  const { addXP, showNotif, recordAnswer, toggleFavorite, favorites } = useStore()
+  const [startTime, setStartTime] = useState(Date.now())
+  const { addXP, showNotif, recordExerciseResult, toggleFavorite, favorites } = useStore()
   const { speak } = useTTS()
   const ex = exercises[idx % exercises.length]
   const isFav = favorites.includes(ex.id)
@@ -119,13 +127,21 @@ function QCMExercise({ exercises }) {
     if (answered) return
     setSelected(i); setAnswered(true)
     const correct = i === ex.answer
-    recordAnswer(correct)
+    const timeSpent = Math.round((Date.now() - startTime) / 1000)
+    recordExerciseResult({
+      exerciseId: ex.id,
+      exerciseType: 'qcm',
+      score: correct ? 100 : 0,
+      answerGiven: ex.options?.[i] ?? String(i),
+      correct,
+      timeSpent,
+    })
     if (correct) { addXP(10); showNotif('✅ Correct ! +10 XP', 'success') }
     else showNotif('❌ Pas tout à fait…', 'error')
   }
 
-  const next = () => { setSelected(null); setAnswered(false); setShowHint(false); setIdx(i => i + 1) }
-  const reset = () => { setSelected(null); setAnswered(false); setShowHint(false) }
+  const next = () => { setSelected(null); setAnswered(false); setShowHint(false); setIdx(i => i + 1); setStartTime(Date.now()) }
+  const reset = () => { setSelected(null); setAnswered(false); setShowHint(false); setStartTime(Date.now()) }
 
   return (
     <div>
@@ -197,11 +213,20 @@ function FillExercise({ exercises }) {
   const [idx, setIdx] = useState(0)
   const ex = exercises[idx % exercises.length]
   const [answered, setAnswered] = useState(false)
-  const { addXP, showNotif, recordAnswer } = useStore()
+  const [startTime, setStartTime] = useState(Date.now())
+  const { addXP, showNotif, recordExerciseResult } = useStore()
 
-  const handleAnswer = (correct) => {
+  const handleAnswer = (correct, answerGiven) => {
     setAnswered(true)
-    recordAnswer(correct)
+    const timeSpent = Math.round((Date.now() - startTime) / 1000)
+    recordExerciseResult({
+      exerciseId: ex.id,
+      exerciseType: 'fill',
+      score: correct ? 100 : 0,
+      answerGiven: answerGiven ?? null,
+      correct,
+      timeSpent,
+    })
     if (correct) { addXP(15); showNotif('🎉 Parfait ! +15 XP', 'success') }
   }
 
@@ -212,7 +237,7 @@ function FillExercise({ exercises }) {
         <FillCard ex={ex} onAnswer={handleAnswer} answered={answered} />
       </div>
       {answered && (
-        <button onClick={() => { setAnswered(false); setIdx(i => i + 1) }} className="btn-primary" style={{ marginTop: 12 }}>
+        <button onClick={() => { setAnswered(false); setIdx(i => i + 1); setStartTime(Date.now()) }} className="btn-primary" style={{ marginTop: 12 }}>
           Suivant <ChevronRight size={14} />
         </button>
       )}
@@ -228,7 +253,7 @@ function FillCard({ ex, onAnswer, answered: extAnswered }) {
   const check = () => {
     setChecked(true)
     const correct = answers.filter((a, i) => a?.trim().toLowerCase() === blanks[i]?.toLowerCase()).length
-    onAnswer(correct === blanks.length)
+    onAnswer(correct === blanks.length, answers.join(' / '))
   }
 
   const isCorrect = (i) => answers[i]?.trim().toLowerCase() === blanks[i]?.toLowerCase()
@@ -265,16 +290,31 @@ function FillCard({ ex, onAnswer, answered: extAnswered }) {
 function MatchExercise({ exercises }) {
   const [idx, setIdx] = useState(0)
   const [answered, setAnswered] = useState(false)
+  const [startTime, setStartTime] = useState(Date.now())
   const ex = exercises[idx % exercises.length]
-  const { addXP, showNotif, recordAnswer } = useStore()
+  const { addXP, showNotif, recordExerciseResult } = useStore()
+
+  const handleMatchAnswer = (correct) => {
+    setAnswered(true)
+    const timeSpent = Math.round((Date.now() - startTime) / 1000)
+    recordExerciseResult({
+      exerciseId: ex.id,
+      exerciseType: 'match',
+      score: correct ? 100 : 0,
+      answerGiven: null,
+      correct,
+      timeSpent,
+    })
+    if (correct) { addXP(20); showNotif('🎉 +20 XP !', 'success') }
+  }
 
   return (
     <div>
       <ExerciseHeader current={(idx % exercises.length) + 1} total={exercises.length} level={ex.level} exerciseId={ex.id} />
       <div style={{ marginTop: 14 }}>
-        <MatchCard ex={ex} onAnswer={(correct) => { setAnswered(true); recordAnswer(correct); if (correct) { addXP(20); showNotif('🎉 +20 XP !', 'success') } }} answered={answered} />
+        <MatchCard ex={ex} onAnswer={handleMatchAnswer} answered={answered} />
       </div>
-      {answered && <button onClick={() => { setAnswered(false); setIdx(i => i + 1) }} className="btn-primary" style={{ marginTop: 12 }}>Suivant <ChevronRight size={14} /></button>}
+      {answered && <button onClick={() => { setAnswered(false); setIdx(i => i + 1); setStartTime(Date.now()) }} className="btn-primary" style={{ marginTop: 12 }}>Suivant <ChevronRight size={14} /></button>}
     </div>
   )
 }
@@ -341,11 +381,27 @@ function PronunciationExercise() {
   const [result, setResult] = useState(null)
   const { speak, speaking } = useTTS()
   const { start, stop, listening, transcript, supported, compareWithTarget } = useSpeechRecognition()
-  const { addXP, showNotif } = useStore()
+  const { addXP, showNotif, recordExerciseResult } = useStore()
   const ex = pronExercises[idx % pronExercises.length]
 
   const handleListen = () => {
-    if (listening) { stop(); if (transcript) { const r = compareWithTarget(transcript, ex.target || ex.word); setResult(r); if (r.score >= 80) { addXP(15); showNotif('🎤 Excellente prononciation ! +15 XP', 'success') } } }
+    if (listening) {
+      stop()
+      if (transcript) {
+        const r = compareWithTarget(transcript, ex.target || ex.word)
+        setResult(r)
+        const correct = r.score >= 80
+        recordExerciseResult({
+          exerciseId: ex?.id,
+          exerciseType: 'pronunciation',
+          score: r.score,
+          answerGiven: transcript,
+          correct,
+          timeSpent: null,
+        })
+        if (correct) { addXP(15); showNotif('🎤 Excellente prononciation ! +15 XP', 'success') }
+      }
+    }
     else { setResult(null); start('en-US') }
   }
 
